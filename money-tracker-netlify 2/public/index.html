@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Money tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style id="css">
+:root{
+  --bg:#FDF1F4; --surface:#FFFFFF; --ink:#3A2430; --muted:#86636F; --line:#F1D5DE;
+  --jade:#2B7F66; --jade-soft:#DDF0E8; --plum:#B83A62; --plum-soft:#FBE1EA; --gold:#B8860B;
+  --hero:#F8D3DF; --rose:#D4628A; --gold-soft:#F8EBCB;
+  --focus:#2F6FD6;
+  color-scheme:light;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#1E1418; --surface:#2A1B21; --ink:#F6E6EC; --muted:#C2A2AE; --line:#40292F;
+    --jade:#5CC9A7; --jade-soft:#1D3A31; --plum:#F08DAD; --plum-soft:#45202D; --gold:#E0B44C;
+    --hero:#4D2A37; --rose:#F08DAD; --gold-soft:#3A3018;
+    --focus:#7FA8F0; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#1E1418; --surface:#2A1B21; --ink:#F6E6EC; --muted:#C2A2AE; --line:#40292F;
+  --jade:#5CC9A7; --jade-soft:#1D3A31; --plum:#F08DAD; --plum-soft:#45202D; --gold:#E0B44C;
+  --hero:#4D2A37; --rose:#F08DAD; --gold-soft:#3A3018;
+  --focus:#7FA8F0; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:"Figtree",system-ui,-apple-system,"Segoe UI","Noto Sans Myanmar","Noto Sans Thai",sans-serif;
+  font-size:16px;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding:28px 18px 64px}
+h1,h2,.big{font-family:"Bricolage Grotesque","Figtree",system-ui,sans-serif}
+h1{font-size:1.15rem;font-weight:600;margin:0 0 18px;color:var(--muted)}
+h2{font-size:1.25rem;font-weight:600;margin:0 0 12px}
+
+.hero{background:var(--hero);color:var(--ink);border-radius:22px;padding:26px 24px 22px;position:relative;overflow:hidden}
+.hero p{margin:0}
+.hero .lbl{font-size:1rem;opacity:.9}
+.big{font-size:clamp(2.6rem,10vw,4.4rem);font-weight:800;line-height:1.05;letter-spacing:-.02em;margin:4px 0 10px;font-variant-numeric:tabular-nums}
+.big.neg{color:var(--plum)}
+.meter{height:10px;border-radius:99px;background:var(--surface);overflow:hidden;margin:6px 0 10px}
+.meter span{display:block;height:100%;background:var(--rose);border-radius:99px;transition:width .4s ease}
+.hero .sub{font-size:.95rem;opacity:.92}
+
+.stats{display:grid;grid-template-columns:repeat(4,1fr);background:var(--surface);border:1px solid var(--line);border-radius:14px;margin:14px 0 26px;overflow:hidden}
+.stat{padding:14px 16px;border-left:1px solid var(--line)}
+.stat:first-child{border-left:0}
+.stat .k{font-size:.82rem;color:var(--muted);white-space:nowrap}
+.stat .v{font-size:1.05rem;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;margin-top:2px}
+@media (max-width:640px){.stats{grid-template-columns:1fr 1fr}.stat:nth-child(3){border-left:0}.stat:nth-child(n+3){border-top:1px solid var(--line)}}
+
+
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:26px}
+.tabs{display:flex;gap:6px;background:var(--bg);padding:5px;border-radius:12px;margin-bottom:16px}
+.tabs button{flex:1;border:0;background:transparent;color:var(--muted);font:inherit;font-weight:700;padding:10px;border-radius:9px;cursor:pointer}
+.tabs button[aria-selected="true"].in{background:var(--jade-soft);color:var(--jade)}
+.tabs button[aria-selected="true"].out{background:var(--plum-soft);color:var(--plum)}
+.tabs button[aria-selected="true"].ex{background:var(--gold-soft);color:var(--gold)}
+.btn.ex{background:var(--gold)}
+.tag.ex{background:var(--gold-soft);color:var(--gold)}
+.exv{color:var(--gold);font-weight:700}
+.kyat{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px;padding-top:12px;border-top:1px solid rgba(0,0,0,.08)}
+.kyat strong{font-size:1.25rem;font-variant-numeric:tabular-nums}
+.tabs button{padding:10px 6px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.grid .full{grid-column:1/-1}
+@media (max-width:520px){.grid{grid-template-columns:1fr}}
+label{display:block;font-size:.88rem;color:var(--muted);margin-bottom:4px}
+input{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px}
+input:focus-visible,button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.hint{font-size:.85rem;color:var(--muted);margin-top:4px}
+.btn{margin-top:14px;width:100%;border:0;border-radius:12px;padding:13px;font:inherit;font-weight:700;cursor:pointer;color:#fff}
+.btn.in{background:var(--jade)} .btn.out{background:var(--plum)}
+:root[data-theme="dark"] .btn{color:#0F1A17}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .btn{color:#0F1A17}}
+.btn:disabled{opacity:.55;cursor:default}
+.err{color:var(--plum);font-size:.9rem;margin-top:8px;min-height:1.2em}
+
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;min-width:640px;font-variant-numeric:tabular-nums}
+th,td{padding:10px 12px;text-align:right;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:.82rem;color:var(--muted);font-weight:700;background:var(--bg)}
+th:nth-child(1),td:nth-child(1),th:nth-child(2),td:nth-child(2){text-align:left}
+td:nth-child(2){white-space:normal;min-width:160px}
+tr:last-child td{border-bottom:0}
+.tag{display:inline-block;font-size:.75rem;font-weight:700;padding:2px 8px;border-radius:99px;margin-right:6px}
+.tag.in{background:var(--jade-soft);color:var(--jade)} .tag.out{background:var(--plum-soft);color:var(--plum)}
+.pos{color:var(--jade);font-weight:700} .negv{color:var(--plum);font-weight:700}
+.rate{display:block;font-size:.8rem;color:var(--muted)}
+.del{border:0;background:transparent;color:var(--muted);cursor:pointer;font-size:1.1rem;padding:4px 8px;border-radius:8px}
+.del:hover{color:var(--plum);background:var(--plum-soft)}
+.empty{padding:28px;text-align:center;color:var(--muted)}
+.link{border:0;background:none;padding:0;font:inherit;color:var(--plum);text-decoration:underline;cursor:pointer}
+.status{font-size:.88rem;color:var(--muted);margin:10px 0 0;min-height:1.3em}
+.ro{background:var(--surface);border:1px dashed var(--line);border-radius:14px;padding:12px 14px;color:var(--muted);margin-bottom:22px}
+@media (prefers-reduced-motion:reduce){.meter span{transition:none}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script id="app">
+(function(){
+  var LAKH = 100000;
+
+  var state = {entries:[]};
+  var readOnly = false, saving = false, loading = true, loadError = false, mode = 'recv';
+  try { var t = sessionStorage.getItem('sm-mode'); if(t==='recv'||t==='ex'||t==='out') mode = t; } catch(e){}
+
+  var root = document.getElementById('root');
+
+  function today(){ var d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+  function fmtMMK(n){ return (n<0?'−':'') + Math.round(Math.abs(n)).toLocaleString('en-US') + ' Ks'; }
+  function fmtTHB(n){ var s = Math.abs(n).toLocaleString('en-US',{minimumFractionDigits:2,maximumFractionDigits:2}); return (n<0?'−':'') + '฿' + s; }
+  function fmtRate(r){ return '฿' + r.toFixed(2).replace(/\.00$/,'') + ' per 100,000 Ks'; }
+  function fmtDate(s){ var p=s.split('-'); var m=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+p[1]-1]; return (+p[2])+' '+m+' '+p[0]; }
+  function esc(s){ return String(s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];}); }
+  function num(v){ var n = parseFloat(String(v).replace(/,/g,'')); return isFinite(n) ? n : NaN; }
+
+  // Entry effects. Type "in" is an older combined entry (received and exchanged at once).
+  function kyatIn(e){ return (e.type==='recv'||e.type==='in') ? e.mmk : 0; }
+  function kyatOut(e){ return (e.type==='ex'||e.type==='in') ? e.mmk : 0; }
+  function bahtIn(e){ return (e.type==='ex'||e.type==='in') ? e.thb : 0; }
+  function bahtOut(e){ return e.type==='out' ? e.thb : 0; }
+
+  function sorted(){
+    return state.entries.slice().sort(function(a,b){ return a.date<b.date?-1:a.date>b.date?1:(a.t||0)-(b.t||0); });
+  }
+  function totals(){
+    var t={recv:0, exK:0, exB:0, out:0};
+    state.entries.forEach(function(e){ t.recv+=kyatIn(e); t.exK+=kyatOut(e); t.exB+=bahtIn(e); t.out+=bahtOut(e); });
+    t.kyatLeft = t.recv - t.exK; t.bahtLeft = t.exB - t.out;
+    t.rate = t.exK>0 ? t.exB/t.exK*LAKH : 0;
+    return t;
+  }
+  function lastRate(){
+    var ex = sorted().filter(function(e){ return (e.type==='ex'||e.type==='in') && e.mmk>0; }).pop();
+    return ex ? +(ex.thb/ex.mmk*LAKH).toFixed(2) : '';
+  }
+
+  function render(){
+    var t = totals();
+    var pct = t.exB>0 ? Math.max(0,Math.min(100, t.bahtLeft/t.exB*100)) : 0;
+    var rows = sorted(), rk = 0, rb = 0, body = '';
+    rows.forEach(function(e){
+      rk += kyatIn(e) - kyatOut(e); rb += bahtIn(e) - bahtOut(e);
+      var tag = e.type==='recv' ? ['in','Received'] : e.type==='ex' ? ['ex','Exchanged'] : e.type==='out' ? ['out','Spent'] : ['in','Received + exchanged'];
+      var def = e.type==='recv' ? 'Transfer from sister' : e.type==='ex' ? 'Kyat to baht' : e.type==='in' ? 'Transfer from sister' : '';
+      var kCell = '', bCell = '';
+      if(e.type==='recv') kCell = '<span class="pos">+'+fmtMMK(e.mmk)+'</span>';
+      if(e.type==='ex') kCell = '<span class="exv">−'+fmtMMK(e.mmk)+'</span>';
+      if(e.type==='in') kCell = fmtMMK(e.mmk);
+      if(e.type==='ex'||e.type==='in') bCell = '<span class="pos">+'+fmtTHB(e.thb)+'</span><span class="rate">'+fmtRate(e.thb/e.mmk*LAKH)+'</span>';
+      if(e.type==='out') bCell = '<span class="negv">−'+fmtTHB(e.thb)+'</span>';
+      body += '<tr>'+
+        '<td>'+fmtDate(e.date)+'</td>'+
+        '<td><span class="tag '+tag[0]+'">'+tag[1]+'</span>'+esc(e.note||def)+'</td>'+
+        '<td>'+kCell+'</td>'+
+        '<td>'+bCell+'</td>'+
+        '<td'+(rk<0?' class="negv"':'')+'>'+fmtMMK(rk)+'</td>'+
+        '<td'+(rb<0?' class="negv"':'')+'><strong>'+fmtTHB(rb)+'</strong></td>'+
+        (readOnly?'':'<td><button class="del" data-del="'+e.id+'" aria-label="Delete this entry">✕</button></td>')+
+      '</tr>';
+    });
+
+    var dateField = '<div><label for="f-date">Date</label><input id="f-date" type="date" value="'+today()+'"></div>';
+    var fields, btn;
+    if(mode==='recv'){
+      fields = dateField+
+        '<div><label for="f-mmk">Kyat she sent (MMK)</label><input id="f-mmk" inputmode="decimal" placeholder="e.g. 20,000,000"></div>'+
+        '<div class="full"><label for="f-note">Note (optional)</label><input id="f-note" placeholder="e.g. KBZ transfer for November"></div>';
+      btn = '<button class="btn in" id="add">Add kyat received</button>';
+    } else if(mode==='ex'){
+      fields = dateField+
+        '<div><label for="f-thb">Baht you got (THB)</label><input id="f-thb" inputmode="decimal" placeholder="e.g. 100,000"></div>'+
+        '<div><label for="f-rate">Rate (฿ per 100,000 Ks)</label><input id="f-rate" inputmode="decimal" placeholder="e.g. 701" value="'+lastRate()+'"></div>'+
+        '<div><label for="f-mmk">Kyat used (MMK)</label><input id="f-mmk" inputmode="decimal" placeholder="Fills in automatically"><div class="hint">Kyat not exchanged yet: '+fmtMMK(t.kyatLeft)+'</div></div>'+
+        '<div class="full"><label for="f-note">Note (optional)</label><input id="f-note" placeholder="e.g. Exchanged at the shop in Mae Sot"></div>';
+      btn = '<button class="btn ex" id="add">Add exchange</button>';
+    } else {
+      fields = dateField+
+        '<div><label for="f-thb">Amount spent (THB)</label><input id="f-thb" inputmode="decimal" placeholder="e.g. 450"><div class="hint">Baht on hand: '+fmtTHB(t.bahtLeft)+'</div></div>'+
+        '<div class="full"><label for="f-note">What was it for?</label><input id="f-note" placeholder="e.g. Rent, groceries, phone top-up"></div>';
+      btn = '<button class="btn out" id="add">Add spending</button>';
+    }
+    if(saving) btn = btn.replace('id="add"','id="add" disabled');
+
+    var form = readOnly ? '<div class="ro">You’re viewing this list. </div>' :
+      '<section class="panel">'+
+        '<div class="tabs" role="tablist">'+
+          '<button role="tab" class="in" data-mode="recv" aria-selected="'+(mode==='recv')+'">Kyat received</button>'+
+          '<button role="tab" class="ex" data-mode="ex" aria-selected="'+(mode==='ex')+'">Exchange</button>'+
+          '<button role="tab" class="out" data-mode="out" aria-selected="'+(mode==='out')+'">Spent</button>'+
+        '</div>'+
+        '<div class="grid">'+fields+'</div>'+btn+
+        '<div class="err" id="err" role="alert"></div>'+
+      '</section>';
+
+    root.innerHTML =
+      '<div class="wrap">'+
+        '<h1>Money tracker</h1>'+
+        '<section class="hero">'+
+          '<p class="lbl">Baht on hand for her</p>'+
+          '<p class="big'+(t.bahtLeft<0?' neg':'')+'">'+fmtTHB(t.bahtLeft)+'</p>'+
+          '<div class="meter" aria-hidden="true"><span style="width:'+pct.toFixed(1)+'%"></span></div>'+
+          '<p class="sub">'+fmtTHB(t.exB)+' exchanged so far, '+fmtTHB(t.out)+' spent'+(t.bahtLeft<0?'. More has been spent than exchanged.':'')+'</p>'+
+          '<div class="kyat"><span>Kyat not exchanged yet</span><strong'+(t.kyatLeft<0?' class="negv"':'')+'>'+fmtMMK(t.kyatLeft)+'</strong></div>'+
+        '</section>'+
+        '<div class="stats">'+
+          '<div class="stat"><div class="k">Kyat received</div><div class="v">'+fmtMMK(t.recv)+'</div></div>'+
+          '<div class="stat"><div class="k">Kyat exchanged</div><div class="v">'+fmtMMK(t.exK)+'</div></div>'+
+          '<div class="stat"><div class="k">Baht exchanged</div><div class="v">'+fmtTHB(t.exB)+'</div></div>'+
+          '<div class="stat"><div class="k">Baht spent</div><div class="v">'+fmtTHB(t.out)+'</div></div>'+
+        '</div>'+
+        form+
+        '<h2>History</h2>'+
+        (rows.length ?
+          '<div class="scroll"><table><thead><tr><th>Date</th><th>Details</th><th>Kyat</th><th>Baht</th><th>Kyat left</th><th>Baht left</th>'+(readOnly?'':'<th><span style="position:absolute;left:-9999px">Delete</span></th>')+'</tr></thead><tbody>'+body+'</tbody></table></div>'
+          : '<div class="scroll"><div class="empty">'+(loading?'Loading…':loadError?'Couldn’t load the list. Check your connection and refresh.':'No entries yet. Start by adding the kyat your sister sent.')+'</div></div>')+
+        '<p class="status" id="status">'+(saving?'Saving…':'')+'</p>'+
+      '</div>';
+    wire();
+  }
+
+  function wire(){
+    root.querySelectorAll('[data-mode]').forEach(function(b){
+      b.onclick = function(){ mode = b.getAttribute('data-mode'); try{sessionStorage.setItem('sm-mode',mode);}catch(e){} render(); };
+    });
+    root.querySelectorAll('[data-del]').forEach(function(b){
+      b.onclick = function(){
+        var id = b.getAttribute('data-del');
+        var e = state.entries.filter(function(x){return x.id===id;})[0];
+        if(!e) return;
+        var what = e.type==='recv' ? 'received '+fmtMMK(e.mmk) : e.type==='out' ? 'spent '+fmtTHB(e.thb) : 'exchange '+fmtTHB(e.thb);
+        if(!confirm('Delete this entry ('+what+')?')) return;
+        write('DELETE', '/api/entries/'+encodeURIComponent(id));
+      };
+    });
+    var mmk = document.getElementById('f-mmk'), rate = document.getElementById('f-rate'), thb = document.getElementById('f-thb');
+    if(mode==='ex' && mmk && rate && thb){
+      var calcK = function(){ var b=num(thb.value), r=num(rate.value); if(b>0 && r>0) mmk.value = Math.round(b/r*LAKH).toLocaleString('en-US'); };
+      thb.oninput = calcK; rate.oninput = calcK;
+      mmk.oninput = function(){ var b=num(thb.value), k=num(mmk.value); if(b>0 && k>0) rate.value = (b/k*LAKH).toFixed(2); };
+    }
+    var add = document.getElementById('add');
+    if(add) add.onclick = onAdd;
+  }
+
+  function onAdd(){
+    var err = document.getElementById('err');
+    var date = document.getElementById('f-date').value || today();
+    var note = document.getElementById('f-note').value.trim();
+    var entry = {id: Date.now().toString(36)+Math.random().toString(36).slice(2,6), t: Date.now(), type: mode, date: date, note: note};
+    if(mode==='recv'){
+      var k = num(document.getElementById('f-mmk').value);
+      if(!(k>0)){ err.textContent = 'Enter how many kyat she sent.'; return; }
+      entry.mmk = Math.round(k);
+    } else if(mode==='ex'){
+      var b = num(document.getElementById('f-thb').value);
+      var km = num(document.getElementById('f-mmk').value);
+      if(!(b>0)){ err.textContent = 'Enter how much baht you got.'; return; }
+      if(!(km>0)){ err.textContent = 'Enter the rate or the kyat used.'; return; }
+      entry.thb = Math.round(b*100)/100; entry.mmk = Math.round(km);
+    } else {
+      var s = num(document.getElementById('f-thb').value);
+      if(!(s>0)){ err.textContent = 'Enter how much baht was spent.'; return; }
+      entry.thb = Math.round(s*100)/100;
+    }
+    write('POST', '/api/entries', entry);
+  }
+
+  function setStatus(msg){ var el = document.getElementById('status'); if(el) el.textContent = msg; }
+
+  function load(){
+    return fetch('/api/entries', {cache:'no-store'}).then(function(r){
+      if(!r.ok) throw new Error('load');
+      return r.json();
+    }).then(function(d){
+      state.entries = Array.isArray(d.entries) ? d.entries : [];
+      loading = false; loadError = false; render();
+    }).catch(function(){ loading = false; loadError = true; render(); });
+  }
+
+  function write(method, url, body){
+    saving = true; render();
+    fetch(url, {method: method, headers: {'content-type':'application/json'}, body: body ? JSON.stringify(body) : undefined})
+      .then(function(r){
+        saving = false;
+        if(r.status===429){ render(); setStatus('Too many tries. Wait a minute, then try again.'); return; }
+        if(!r.ok) throw new Error('save');
+        return load().then(function(){ setStatus('Saved.'); setTimeout(function(){ setStatus(''); }, 2000); });
+      })
+      .catch(function(){ saving = false; render(); setStatus('Couldn’t save that change. Check your connection and try again.'); });
+  }
+
+  render();
+  load();
+})();
+</script>
+</body>
+</html>
