@@ -13,3 +13,4 @@ Anyone with the link can view, add and delete entries.
 2. Open the site and start adding entries.
 
 Your current 4 entries are added automatically the first time the site loads.
+
