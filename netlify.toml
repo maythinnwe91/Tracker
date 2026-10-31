@@ -1,0 +1,4 @@
+[build]
+  base = "money-tracker-netlify 2"
+  publish = "public"
+  functions = "netlify/functions"
